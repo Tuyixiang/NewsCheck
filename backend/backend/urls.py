@@ -19,10 +19,14 @@ from django.http import JsonResponse
 from . import database
 
 def home(request):
-    database.update_all_blocking()
-    return JsonResponse({'thing': request.GET.get('thing')})
+    return JsonResponse(database.fetch())
+
+def access(request):
+    database.mark_read(request.GET['key'], request.GET['url'])
+    return JsonResponse({})
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home),
+    path('access', access),
 ]
