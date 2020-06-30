@@ -2,6 +2,7 @@ from backend.free_search import search
 import shelve
 import asyncio
 import datetime
+import os
 
 SEARCH = {
     'Erik Prince': {
@@ -9,6 +10,8 @@ SEARCH = {
         'date_range': 3,
     },
 }
+
+os.makedirs('data', exist_ok=True)
 
 
 def open_db():
