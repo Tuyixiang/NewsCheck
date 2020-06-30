@@ -48,7 +48,9 @@ windows:
       panes:
         - frontend:
           - cd frontend
-          - npm run serve
+          - npm run build
+          - cd dist
+          - python3 -m http.server 8080
         - backend:
           - cd backend
-          - python3 manage.py runserver
+          - python3 manage.py runserver 0.0.0.0:8000
