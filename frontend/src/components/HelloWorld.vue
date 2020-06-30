@@ -146,13 +146,26 @@
 .el-button.is-circle {
   padding: 6px !important;
 }
+.el-popover {
+  max-width: 650px;
+}
 .el-dialog,
 .el-input__inner,
 .el-checkbox,
 .el-checkbox__inner,
 .el-button,
+.el-popover,
 .el-card {
   border-radius: 14px !important;
+}
+.el-button--default,
+.el-card,
+.el-popover {
+  background-color: rgba(255, 255, 255, .9) !important;
+}
+.el-dialog {
+  background-color: rgba(255, 255, 255, .8) !important;
+  backdrop-filter: blur(4px);
 }
 p {
   font-family: Avenir, Helvetica, Arial, sans-serif;
