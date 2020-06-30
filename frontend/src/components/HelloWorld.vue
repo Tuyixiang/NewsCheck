@@ -10,7 +10,10 @@
         >
           <el-card>
             <div style="display: inline-block;">
-              <h3>{{ entry.key }}</h3>
+              <h3>
+                <span v-if="entry.strict">"</span>{{ entry.key
+                }}<span v-if="entry.strict">"</span>
+              </h3>
             </div>
             <el-button
               type="danger"
@@ -18,10 +21,11 @@
               plain
               circle
               style="float: right;"
+              @click="remove_track(entry.key)"
             />
             <el-button
-              style="float: right; margin-right: 5px; font-size: 0.8rem; line-height: 14px;"
-              v-text="data_lengths[entry.key]"
+              style="float: right; margin-right: 5px; font-size: 0.8rem; line-height: 14px; width: 28px;"
+              v-text="data_lengths[entry.key] || 0"
               plain
               circle
             ></el-button>
@@ -59,7 +63,7 @@
       />
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="dialogVisible = false"
+        <el-button type="primary" @click="submit_add" :loading="submitting"
           >添加</el-button
         >
       </span>
@@ -75,25 +79,29 @@
         v-show="entry.show"
       >
         <div slot="header">
-          <el-link
-            type="primary"
-            v-bind:href="entry.url"
-            v-on:click="access(entry.key, entry.url)"
-            v-html="entry.title"
-            target="_blank"
-            style="font-size: 1.2rem"
-          />
+          <el-popover placement="bottom-start" trigger="hover">
+            {{ entry.url }}
+            <el-link
+              slot="reference"
+              type="primary"
+              @click="access(entry.key, entry.url, true)"
+              v-html="entry.title"
+              target="_blank"
+              style="font-size: 1.2rem"
+            />
+          </el-popover>
           <el-button
             icon="el-icon-close"
             plain
             circle
             style="float: right;"
-            @click="access(entry.key, entry.url)"
+            @click="access(entry.key, entry.url, false)"
           />
         </div>
         <div style="width: 100%;" class="meta">
           <div style="display: inline-block; padding-right: 20px;">
-            记录时间: {{ new Date(entry.date).toLocaleString("ja-JP") }}
+            记录时间:
+            {{ new Date(entry.date + "+00:00").toLocaleString("ja-JP") }}
           </div>
           <div style="display: inline-block;">
             来源: {{ trim_url(entry.url) }}
@@ -160,11 +168,11 @@ export default {
       add_input: "",
       add_strict: false,
       dialogVisible: false,
+      submitting: false,
       tracked: [
         {
           key: "Erik Prince",
           strict: true,
-          last_update: "2020-06-29T07:21:04.320470",
         },
       ],
     };
@@ -188,7 +196,7 @@ export default {
   },
   methods: {
     // Notify backend that one url is clicked (or ignored)
-    access: function(key, url) {
+    access: function(key, url, go) {
       this.$http
         .get(this.$backend + "/access", {
           params: {
@@ -201,6 +209,9 @@ export default {
           let entry = this.data[index];
           entry.show = false;
           this.$set(this.data, index, entry);
+          if (go) {
+            window.open(url, "_blank");
+          }
         });
     },
     // Keep domain from a url
@@ -208,21 +219,55 @@ export default {
       return new URL(url).hostname;
     },
     update_tracked: function() {},
+    submit_add: function() {
+      this.submitting = true;
+      this.$http
+        .get(this.$backend + "/add", {
+          params: {
+            key: this.add_input,
+            strict: this.add_strict,
+          },
+        })
+        .then(this.load_data)
+        .then(() => {
+          this.submitting = false;
+          this.dialogVisible = false;
+        });
+    },
+    load_data: function() {
+      let fetch_entries = this.$http.get(this.$backend).then((response) => {
+        this.data = response.data.data;
+        for (let i = 0; i < this.data.length; i++) {
+          this.data[i].show = true;
+          this.data[i].snippet = this.data[i].snippet
+            .replace(/\s+/g, " ")
+            .replace(new RegExp(this.data[i].key, "ig"), "<b>$&</b>");
+          this.data[i].title = this.data[i].title
+            .replace(/\s+/g, " ")
+            .replace(new RegExp(this.data[i].key, "ig"), "<b>$&</b>");
+        }
+        console.log(this.data);
+      });
+      let fetch_tracked = this.$http
+        .get(this.$backend + "/ls")
+        .then((response) => {
+          this.tracked = response.data.data;
+          console.log(this.tracked);
+        });
+      return Promise.all([fetch_entries, fetch_tracked]);
+    },
+    remove_track: function(key) {
+      this.$http
+        .get(this.$backend + "/remove", {
+          params: {
+            key,
+          },
+        })
+        .then(this.load_data);
+    },
   },
-  created: function() {
-    this.$http.get(this.$backend).then((response) => {
-      this.data = response.data.data;
-      for (let i = 0; i < this.data.length; i++) {
-        this.data[i].show = true;
-        this.data[i].snippet = this.data[i].snippet
-          .replace(/\s+/g, " ")
-          .replace(new RegExp(this.data[i].key, "ig"), "<b>$&</b>");
-        this.data[i].title = this.data[i].title
-          .replace(/\s+/g, " ")
-          .replace(new RegExp(this.data[i].key, "ig"), "<b>$&</b>");
-      }
-      console.log(this.data);
-    });
+  mounted: function() {
+    this.load_data();
   },
 };
 </script>

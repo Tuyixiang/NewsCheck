@@ -17,16 +17,47 @@ from django.contrib import admin
 from django.urls import path
 from django.http import JsonResponse
 from . import database
+from threading import Thread
+from time import sleep
+
+
+def schedule():
+    while True:
+        database.update()
+        sleep(3600)
+
+
+Thread(target=schedule).start()
+
 
 def home(request):
     return JsonResponse(database.fetch())
+
 
 def access(request):
     database.mark_read(request.GET['key'], request.GET['url'])
     return JsonResponse({})
 
+
+def remove(request):
+    database.remove(request.GET['key'])
+    return JsonResponse({})
+
+
+def add(request):
+    database.add(request.GET['key'], request.GET['strict'])
+    return JsonResponse({})
+
+
+def ls(request):
+    return JsonResponse({'data': database.ls()})
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home),
     path('access', access),
+    path('remove', remove),
+    path('add', add),
+    path('ls', ls),
 ]

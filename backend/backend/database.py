@@ -9,8 +9,14 @@ SEARCH = {
         'date_range': 3,
     },
 }
-DB_FILE = 'data/store'
-META = "'3\xdd\xa5\xf5oJ\x03"
+
+
+def open_db():
+    return shelve.open('data/store')
+
+
+def open_meta():
+    return shelve.open('data/meta')
 
 
 class Entry:
@@ -40,41 +46,89 @@ class Entry:
         return self.url == other.url
 
 
-async def update_all():
-    search_entries = [search(**kwargs) for kwargs in SEARCH.values()]
+async def update_all(entries):
+    search_entries = [search(**kwargs) for kwargs in entries.values()]
     return await asyncio.gather(*search_entries)
 
 
-def update_all_blocking(db):
-    results = [set(Entry(e) for e in l) for l in asyncio.run(update_all())]
-    for i, key in enumerate(SEARCH):
+def update_all_blocking(db, meta):
+    entries = meta.get('entries', {})
+    results = [set(Entry(e) for e in l)
+               for l in asyncio.run(update_all(entries))]
+    for i, key in enumerate(entries):
         if key not in db:
             db[key] = results[i]
         else:
             db[key] = db[key] | (results[i] - db[key])
 
 
+def update():
+    with open_db() as db:
+        with open_meta() as meta:
+            update_all_blocking(db, meta)
+
+
 def fetch():
-    with shelve.open(DB_FILE) as db:
-        meta = db.get(META, {
-            'last_update': datetime.datetime.min,
-        })
-        if datetime.datetime.now() - meta['last_update'] >= datetime.timedelta(seconds=43200):
-            update_all_blocking(db)
-            meta['last_update'] = datetime.datetime.now()
-            db[META] = meta
-        return {
-            'data': sorted(
-                [{**e.to_dict(), 'key': k}
-                 for k, s in db.items() if k != META for e in s if not e.read],
-                key=lambda x: x['date']
-            ),
-        }
+    with open_db() as db:
+        with open_meta() as meta:
+            try_update(db, meta)
+            return {
+                'data': sorted(
+                    [{**e.to_dict(), 'key': k}
+                     for k in meta.get('entries', {}) for e in db.get(k, []) if not e.read],
+                    key=lambda x: x['date'],
+                    reverse=True,
+                ),
+            }
+
+
+def try_update(db, meta):
+    last_update = meta.get('last_update', datetime.datetime.min)
+    if datetime.datetime.now() - last_update >= datetime.timedelta(seconds=43200):
+        update_all_blocking(db, meta)
+        meta['last_update'] = datetime.datetime.now()
 
 
 def mark_read(key, url):
-    with shelve.open(DB_FILE) as db:
+    with open_db() as db:
         s = db[key]
         s.remove(Entry(url))
         s.add(Entry(url))
         db[key] = s
+
+
+def add(key, strict):
+    with open_meta() as meta:
+        entries = meta.get('entries', {})
+        if strict == 'true':
+            entries[key] = {
+                'strict_terms': key,
+                'date_range': 3,
+            }
+        else:
+            entries[key] = {
+                'keyword': key,
+                'date_range': 3,
+            }
+        meta['entries'] = entries
+        with open_db() as db:
+            update_all_blocking(db, meta)
+
+
+def remove(key):
+    with open_meta() as meta:
+        entries = meta.get('entries', {})
+        if key in entries:
+            del entries[key]
+        meta['entries'] = entries
+
+
+def ls():
+    with open_meta() as meta:
+        entries = meta.get('entries', {})
+        return [
+            {
+                'key': key,
+                'strict': 'strict_terms' in value,
+            } for key, value in entries.items()
+        ]
