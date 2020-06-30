@@ -1,5 +1,11 @@
 <template>
   <div class="main">
+    <el-button
+      style="position:absolute; top: 20px; right: 20px; width: 28px; padding: 6px;"
+      @click="helpVisible = true"
+      round
+      >?</el-button
+    >
     <div class="block">
       <el-row :gutter="20">
         <el-col
@@ -26,19 +32,20 @@
             <el-button
               style="float: right; margin-right: 5px; font-size: 0.8rem; line-height: 14px; width: 28px;"
               v-text="data_lengths[entry.key] || 0"
-              plain
               circle
             ></el-button>
           </el-card>
         </el-col>
-        <el-col :span="12" style="margin-top: 20px; padding-left: 10px; padding-right: 10px;">
+        <el-col
+          :span="12"
+          style="margin-top: 20px; padding-left: 10px; padding-right: 10px;"
+        >
           <el-card>
             <div style="display: inline-block;">
               <h3>新增</h3>
             </div>
             <el-button
               icon="el-icon-plus"
-              plain
               circle
               style="float: right;"
               @click="dialogVisible = true"
@@ -49,18 +56,41 @@
     </div>
 
     <el-dialog
+      title="说明"
+      :visible.sync="helpVisible"
+      width="400px"
+      class="help"
+      center
+    >
+      <p>
+        <b>关键词搜索：</b><br />指定一些搜索条目，它们会每天更新，每次抓取
+        Google 搜索中近 3 天的结果前 2 页。重复结果会被自动移除。
+      </p>
+      <p>
+        <b>浏览：</b
+        ><br />对于获取到的条目，可以点击链接查看，也可以点击按钮移除。这两种操作都会将该条目记录为“已访问”，不会再被显示。
+      </p>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="helpVisible = false">关闭</el-button>
+      </span>
+    </el-dialog>
+
+    <el-dialog
       title="添加搜索条目"
       :visible.sync="dialogVisible"
       width="400px"
       center
     >
       <el-input placeholder="关键词" v-model="add_input" clearable />
-      <el-checkbox
-        v-model="add_strict"
-        label="严格匹配"
-        style="width: 100%; margin-top: 20px;"
-        border
-      />
+      <el-popover placement="top-start" trigger="hover">
+        <p>搜索结果必须包含与以上关键词完全相同的内容</p>
+        <el-checkbox
+          v-model="add_strict"
+          slot="reference"
+          label="严格匹配"
+          style="margin-top: 20px;"
+        />
+      </el-popover>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" @click="submit_add" :loading="submitting"
@@ -80,7 +110,7 @@
       >
         <div slot="header">
           <el-popover placement="bottom-start" trigger="hover">
-            {{ entry.url }}
+            <p>{{ entry.url }}</p>
             <el-link
               slot="reference"
               type="primary"
@@ -92,7 +122,6 @@
           </el-popover>
           <el-button
             icon="el-icon-close"
-            plain
             circle
             style="float: right;"
             @click="access(entry.key, entry.url, false)"
@@ -117,6 +146,17 @@
 .el-button.is-circle {
   padding: 6px !important;
 }
+.el-dialog,
+.el-input__inner,
+.el-checkbox,
+.el-checkbox__inner,
+.el-button,
+.el-card {
+  border-radius: 14px !important;
+}
+p {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+}
 </style>
 
 <style scoped>
@@ -137,6 +177,9 @@
   color: #888888;
   margin-bottom: 20px;
 }
+.help p {
+  margin-bottom: 0.5rem;
+}
 h3 {
   margin: 0;
 }
@@ -154,14 +197,13 @@ export default {
   },
   data: function() {
     return {
-      data: [
-      ],
+      data: [],
       add_input: "",
       add_strict: false,
       dialogVisible: false,
+      helpVisible: false,
       submitting: false,
-      tracked: [
-      ],
+      tracked: [],
     };
   },
   computed: {
@@ -254,7 +296,7 @@ export default {
     },
   },
   mounted: function() {
-    this.$backend = 'http://' + window.location.hostname + ':8000'
+    this.$backend = "http://" + window.location.hostname + ":8000";
     this.load_data();
   },
 };
