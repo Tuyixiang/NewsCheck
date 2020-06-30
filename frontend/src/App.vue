@@ -10,7 +10,6 @@ import axios from 'axios'
 import HelloWorld from "./components/HelloWorld.vue";
 
 Vue.prototype.$http = axios
-Vue.prototype.$backend = 'http://127.0.0.1:8000'
 
 export default {
   name: "App",

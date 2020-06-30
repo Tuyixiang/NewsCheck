@@ -267,6 +267,7 @@ export default {
     },
   },
   mounted: function() {
+    this.$backend = 'http://' + window.location.hostname + ':8000'
     this.load_data();
   },
 };

@@ -51,4 +51,4 @@ windows:
           - npm run serve
         - backend:
           - cd backend
-          - PROXY python3 manage.py runserver
+          - python3 manage.py runserver
