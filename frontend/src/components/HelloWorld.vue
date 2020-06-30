@@ -1,12 +1,12 @@
 <template>
   <div class="main">
     <div class="block">
-      <el-row :gutter="20" style="padding: 0 20px">
+      <el-row :gutter="20">
         <el-col
           :span="12"
           v-for="entry in tracked"
           v-bind:key="entry.key"
-          style="margin-top: 20px;"
+          style="margin-top: 20px; padding-left: 10px; padding-right: 10px;"
         >
           <el-card>
             <div style="display: inline-block;">
@@ -31,7 +31,7 @@
             ></el-button>
           </el-card>
         </el-col>
-        <el-col :span="12" style="margin-top: 20px;">
+        <el-col :span="12" style="margin-top: 20px; padding-left: 10px; padding-right: 10px;">
           <el-card>
             <div style="display: inline-block;">
               <h3>新增</h3>
