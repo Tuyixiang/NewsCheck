@@ -155,25 +155,12 @@ export default {
   data: function() {
     return {
       data: [
-        {
-          date: "2020-06-29T07:21:04.320484",
-          key: "Erik Prince",
-          show: true,
-          snippet:
-            "Erik Prince ➡️ Tywin Trump ➡️ Joffrey Don Jr. ➡️ Ser Gregor Ivanka Trump ➡️ Cersei Jared Kushner ➡️ Littlefinger The White Walkers ➡️ MAGA Stone ...",
-          title: "Seth Abramson (@SethAbramson) on Threader",
-          url: "https://threader.app/@SethAbramson",
-        },
       ],
       add_input: "",
       add_strict: false,
       dialogVisible: false,
       submitting: false,
       tracked: [
-        {
-          key: "Erik Prince",
-          strict: true,
-        },
       ],
     };
   },
