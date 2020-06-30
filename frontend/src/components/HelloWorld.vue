@@ -1,7 +1,7 @@
 <template>
   <div class="main">
     <el-button
-      style="position:absolute; top: 20px; right: 20px; width: 28px; padding: 6px;"
+      style="position:absolute; top: 20px; right: 20px; width: 28px; padding: 6px; box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);"
       @click="helpVisible = true"
       round
       >?</el-button
@@ -161,10 +161,14 @@
 .el-button--default,
 .el-card,
 .el-popover {
-  background-color: rgba(255, 255, 255, .9) !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+.el-button,
+.el-input__inner {
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,.05);
 }
 .el-dialog {
-  background-color: rgba(255, 255, 255, .8) !important;
+  background-color: rgba(255, 255, 255, 0.8) !important;
   backdrop-filter: blur(4px);
 }
 p {
