@@ -53,5 +53,4 @@ windows:
           - python3 -m http.server 8080
         - backend:
           - cd backend
-          - python3 manage.py migrate
           - python3 manage.py runserver 0.0.0.0:8000

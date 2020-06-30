@@ -23,8 +23,8 @@ from time import sleep
 
 def schedule():
     while True:
-        database.update()
         sleep(86400)
+        database.update()
 
 
 Thread(target=schedule).start()
