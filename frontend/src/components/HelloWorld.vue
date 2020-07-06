@@ -11,8 +11,7 @@
           <div style="display: inline-block;">
             <h3>
               <span v-if="entry.strict">"</span>
-              {{ entry.key
-              }}
+              {{ entry.key.substring(1) }}
               <span v-if="entry.strict">"</span>
             </h3>
           </div>
