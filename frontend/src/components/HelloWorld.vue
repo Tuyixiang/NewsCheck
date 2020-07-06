@@ -271,10 +271,12 @@ export default {
           this.data[i].show = true;
           this.data[i].snippet = (this.data[i].snippet || "")
             .replace(/\s+/g, " ")
-            .replace(new RegExp(this.data[i].key, "ig"), "<b>$&</b>");
           this.data[i].title = this.data[i].title
-            .replace(/\s+/g, " ")
-            .replace(new RegExp(this.data[i].key, "ig"), "<b>&nbsp;$&&nbsp;</b>");
+            .replace(/\s+/g, " ");
+          this.data[i].key.substring(1).split(" ").forEach(word => {
+            this.data[i].title = this.data[i].title.replace(new RegExp(word, "ig"), "<b>&nbsp;$&&nbsp;</b>");
+            this.data[i].snippet = this.data[i].snippet.replace(new RegExp(word, "ig"), "<b>$&</b>");
+          })
         }
         console.log(this.data);
       });

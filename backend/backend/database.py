@@ -104,13 +104,13 @@ def add(key, strict):
     with open_meta() as meta:
         entries = meta.get('entries', {})
         if strict == 'true':
-            entries[key] = {
-                'strict_terms': key,
+            entries['1' + key] = {
+                'strict_terms': key.split(),
                 'date_range': 3,
             }
         else:
-            entries[key] = {
-                'keyword': key,
+            entries['0' + key] = {
+                'keyword': key.split(),
                 'date_range': 3,
             }
         meta['entries'] = entries

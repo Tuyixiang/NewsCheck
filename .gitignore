@@ -4,3 +4,4 @@ api_keys.py
 free_search.log
 data
 .vscode
+db.sqlite3
